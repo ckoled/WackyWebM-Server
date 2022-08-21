@@ -453,9 +453,10 @@ async function main(selectedModes, videoPath, keyFrameFile, bitrate, maxThread, 
 
 				// Output log
 				const framePad = String(sameSizeCount).padStart((Math.log10(frameCount) + 1) | 0)
-				process.stdout.clearLine()
-				process.stdout.cursorTo(0)
-				process.stdout.write(localizeString('convert_progress', { framecount: framePad, startframe: frame, endframe: frame + sameSizeCount - 1, batch_size: frameCount, percent: Math.floor((1000 * totalFramesDone) / frameCount) / 10.0}))
+				// process.stdout.clearLine()
+				// process.stdout.cursorTo(0)
+				// process.stdout.write(localizeString('convert_progress', { framecount: framePad, startframe: frame, endframe: frame + sameSizeCount - 1, batch_size: frameCount, percent: Math.floor((1000 * totalFramesDone) / frameCount) / 10.0}))
+				console.log(localizeString('convert_progress', { framecount: framePad, startframe: frame, endframe: frame + sameSizeCount - 1, batch_size: frameCount, percent: Math.floor((1000 * totalFramesDone) / frameCount) / 10.0}))
 
 				sameSizeCount = 1
 				lastWidth = frameBounds.width
@@ -472,11 +473,13 @@ async function main(selectedModes, videoPath, keyFrameFile, bitrate, maxThread, 
 			for (const process of subProcess) await process
 			// Clean up
 			subProcess.length = 0
-			process.stdout.write(`\n${localizeString('done_conversion', { time: Date.now() - startTime, frameCount})}`)
+			// process.stdout.write(`\n${localizeString('done_conversion', { time: Date.now() - startTime, frameCount})}`)
+			console.log(`\n${localizeString('done_conversion', { time: Date.now() - startTime, frameCount})}`)
 			break
 		}
 	}
-	process.stdout.write('\n')
+	// process.stdout.write('\n')
+	console.log('\n')
 
 	// Writes the concatenation file for the next step.
 	console.log(localizeString('writing_concat_file'))

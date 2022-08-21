@@ -1,4 +1,4 @@
-# WackyWebM
+# WackyWebM Server
 
 [![Weblate project translated](https://img.shields.io/weblate/progress/wackywebm?server=https%3A%2F%2Ftranslate.kiaibot.com&style=for-the-badge)](https://translate.kiaibot.com/projects/wackywebm/wackywebm)
 ![GitHub contributors](https://img.shields.io/github/contributors/oirnoir/wackywebm?style=for-the-badge)
@@ -6,10 +6,47 @@
 [![Discord](https://img.shields.io/discord/1003791722574266488?style=for-the-badge)](https://discord.gg/wackywebm)
 
 
-WackyWebM is a tool that allows you to create WebM video files with changing aspect ratios.
+WackyWebM is a tool that allows you to create WebM video files with changing aspect ratios. This is a fork that creates an http server to wackify videos remotely.
 
 If you're having issues, want to share your custom modes, or learn from the community join the Discord at the bottom of this readme.
 
+## Running Server
+
+### Locally
+
+Follow steps to setup WackyWebM normally. Then: 
+```
+node server.js
+```
+
+### Docker
+
+```
+docker build . -t wackywebmserver
+```
+```
+docker run --name wackywebmserver -d -p 8080:8080 wackywebmserver
+```
+
+### Calling
+
+```
+url: [API_BASE_PATH]/api/wackify
+query: {
+  mode: [default bounce]
+  bitrate: [default '1M']
+  tempo: [default 2]
+  angle: [default 360]
+  compression: [default 0]
+  transparency: [default 1]
+}
+body: {
+  file: [required]
+  keyfile: [default none]
+}
+```
+
+## Normal WackyWebM
 ## Dependencies
 
 - [NodeJS v16.6 or higher](https://nodejs.org/en/download/)

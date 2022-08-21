@@ -45,7 +45,7 @@ function setLocale(l) {
 function localizeString(key, args = {}) {
 	key = key.toString().toLowerCase().replace(/[- ]/g, '_')
 	let rawTranslation = currentLocale[key] ?? fallBackLocale[key] ?? fallBackLocale['no_translation']
-	for (const replaceKey of Object.keys(args)) rawTranslation = rawTranslation.replaceAll(`{${replaceKey.toLowerCase()}}`, args[replaceKey])
+	for (const replaceKey of Object.keys(args)) rawTranslation = rawTranslation.split(`{${replaceKey.toLowerCase()}}`).join(args[replaceKey])
 
 	return rawTranslation
 }
