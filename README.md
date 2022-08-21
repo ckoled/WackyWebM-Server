@@ -45,6 +45,8 @@ body: {
   keyfile: [default none]
 }
 ```
+UI served at http://localhost:8080\
+[Demo](https://wackify.jarasicrabit.com)
 
 ## Normal WackyWebM
 ## Dependencies
