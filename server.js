@@ -1,5 +1,6 @@
-// const path = require('path')
+const path = require('path')
 const fs = require('fs')
+const cors = require('cors')
 const fileUpload = require('express-fileupload')
 const { main } = require('./wackywebm.js')
 const express = require('express')
@@ -8,38 +9,26 @@ const app = express()
 
 const tempDir = 'server_tmp';
 
-const defaults = {
-  mode: 'bounce',
-  bitrate: '1M',
-  thread: 2,
-  tempo: 2,
-  angle: 360,
-  compression: 0,
-  transparency: 1
-}
 async function wackify (req, res) {
   console.log('/wackify')
   const tempfiles = []
   try {
-    const options = {
-      ...defaults,
-      ...req.query
-    }
     let { 
-      mode,
-      bitrate,
-      thread,
-      tempo,
-      angle,
-      compression,
-      transparency
-    } = options
+      mode=['bounce'],
+      bitrate='1M',
+      thread=1,
+      tempo=2,
+      angle=360,
+      compression=0,
+      transparency=1
+    } = req.query
     // because + is space in http query
-    mode = mode.toLowerCase().split(' ')
     console.log(mode)
     const filename = req.files.file.tempFilePath
     const keyfilename = req.files.keyfile?req.files.keyfile.tempFilePath:undefined
-    tempfiles.push(filename, keyfilename)
+    const outfile = filename + '_out.webm'
+    tempfiles.push(filename, keyfilename, outfile)
+    
     await main(
       mode,
       filename,
@@ -50,11 +39,10 @@ async function wackify (req, res) {
       angle,
       compression,
       transparency,
-      filename + '_out.webm'
+      outfile
     )
-    const file = filename + '_out.webm'
-    tempfiles.push(file)
-    const buf = fs.readFileSync(file)
+    
+    const buf = fs.readFileSync(outfile)
     tempfiles.forEach(function (f) {
       try {
         fs.unlinkSync(f)
@@ -79,6 +67,7 @@ async function wackify (req, res) {
 
 router.post('/wackify', wackify)
 
+app.use(cors())
 app.use(express.json())
 app.use(fileUpload({
   useTempFiles: true,
@@ -86,9 +75,12 @@ app.use(fileUpload({
   debug: true
 }))
 app.use('/api', router)
-app.get('*', function (req, res) {
-  res.status(404).send("Not Found")
-})
+
+const root = path.join(__dirname, 'web', 'dist');
+app.use(express.static(root));
+app.get('/*', (req, res) => {
+  res.sendFile('index.html', { root });
+});
 
 if (!fs.existsSync(tempDir)){
   fs.mkdirSync(tempDir);

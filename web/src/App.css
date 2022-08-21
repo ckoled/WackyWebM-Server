@@ -1,0 +1,31 @@
+@import 'antd/dist/antd.dark.min.css';
+
+body {
+  font-family: "Poppins", sans-serif;
+  padding-top: 10px;
+  height: 100vh;
+  width: 100vw;
+}
+
+h1 {
+  font-weight: bold;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+#content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.response {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
