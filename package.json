@@ -11,7 +11,8 @@
 		"lint": "eslint **/*.js",
 		"lint:fix": "eslint **/*.js --fix",
 		"server": "node server.js",
-		"clean": "rm -rf node_modules web/node_modules web/dist"
+		"clean": "rm -rf node_modules web/node_modules web/dist",
+		"build": "cd web && npm run build"
 	},
 	"repository": {
 		"type": "git",

@@ -14,7 +14,9 @@ If you're having issues, want to share your custom modes, or learn from the comm
 
 ### Locally
 
-Follow steps to setup WackyWebM normally. Then: 
+Follow steps to setup WackyWebM normally.
+
+Build frontend with `npm run build`. Then
 ```
 node server.js
 ```
@@ -33,7 +35,7 @@ docker run --name wackywebmserver -d -p 8080:8080 wackywebmserver
 ```
 url: [API_BASE_PATH]/api/wackify
 query: {
-  mode: [default bounce]
+  mode: [default 'bounce']
   bitrate: [default '1M']
   tempo: [default 2]
   angle: [default 360]
@@ -42,11 +44,17 @@ query: {
 }
 body: {
   file: [required]
-  keyfile: [default none]
+  keyfile: [default null]
 }
 ```
-UI served at http://localhost:8080\
-[Demo](https://wackify.jarasicrabit.com)
+UI served at http://localhost:8080
+
+[Hosted Demo](https://wackify.jarasicrabit.com)
+
+## TODO
+ - convert main to handler
+ - keyfile
+ - save as
 
 ## Normal WackyWebM
 ## Dependencies
