@@ -135,7 +135,7 @@ function App() {
               </Form.Item>
               <Form.Item
                 name='transparency'
-                label='transparency'
+                label='Transparency'
               >
                 <InputNumber placeholder='1'/>
               </Form.Item>

@@ -55,14 +55,16 @@ UI served at http://localhost:8080
  - convert main to handler
  - keyfile
  - save as
+ - validation
 
-## Normal WackyWebM
+## WackyWebM
 ## Dependencies
 
 - [NodeJS v16.6 or higher](https://nodejs.org/en/download/)
 - [FFmpeg](https://ffmpeg.org/download.html)
 - FFprobe (included with FFmpeg)
 - Various NPM packages (simply run `npm i` in the project directory after installing node to install them automatically)
+-  Or just [Docker](https://www.docker.com/products/docker-desktop/)
 
 ## NodeJS
 
@@ -104,23 +106,6 @@ For MacOS users, refer to [this](https://bbc.github.io/bbcat-orchestration-docs/
 
 For Linux users, refer to [this](https://www.tecmint.com/install-ffmpeg-in-linux/) tutorial for FFmpeg installation.
 
-## How to Run
-
-After you have finished installing the dependencies, download the WackyWebM folder by clicking the `Code` button in the top right of this page, followed by clicking `Download ZIP`
-
-![image](https://user-images.githubusercontent.com/69131802/182936318-d3c542bc-99a6-4f01-91e0-944c4e9bc0b0.png)
-
-Once the ZIP is fully installed, you need to extract the folder inside. After doing this, you are set.
-
-On Windows, use the `run.bat` file to start WackyWebM.
-
-On MacOS and Linux, use `chmod +x run.sh` then `sh run.sh` file to start WackyWebM
-
-If you're on windows, you can simply double-click run.bat, as long as it's in the same folder as wackywebm.js.
-
-You can also tweak the script to taste if you want to adjust how your file is generated.
-
-You can also change the bitrate of the output file by tweaking -b (Default is 1M, which means 1 MB/s. If the file is too large, consider lowering this value.)
 
 ## Modes
 
