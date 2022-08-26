@@ -69,7 +69,7 @@ router.post('/wackify', wackify)
 
 app.use(cors())
 app.use(express.json())
-app.use(fileUpload({
+app.use('/api', fileUpload({
   useTempFiles: true,
   tempFileDir: tempDir,
   debug: true

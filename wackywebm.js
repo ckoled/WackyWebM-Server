@@ -11,7 +11,7 @@ const fs = require('fs')
 const util = require('util')
 // I'll admit, inconvenient naming here.
 const { delta, getFileName } = require('./util')
-const { localizeString, setLocale } = require('./localization')
+const { localizeString } = require('./localization')
 const execAsync = util.promisify(require('child_process').exec)
 const UPNG = require("upng-js")
 
@@ -26,202 +26,24 @@ for (const modeFile of fs.readdirSync(modesDir).filter((file) => file.endsWith('
 	}
 }
 
-let selectedModes = [],
-	videoPath = [],
-	fileName = undefined,
-	filePath = undefined,
-	outputPath = undefined,
-	keyFrameFile = undefined,
-	bitrate = undefined,
-	maxThread = undefined,
-	tempo = undefined,
-	angle = undefined,
-	compressionLevel = undefined,
-	updateCheck = true,
-	transparencyThreshold = undefined
+let updateCheck = true
 
 // NOTE! if you add a new option, please check out if anything needs to be added for it into terminal-ui.js
 
-// TODO localize the arguments' descriptions (and add translation keys for them)
-// along with this, probably localize the usage help
-// this would be especially helpful for terminal-ui users.
-const argsConfig = [
-	{
-		keys: ['-h', '--help'],
-		noValueAfter: true,
-		call: () => {
-			displayUsage()
-			process.exit(1)
-		},
-		description: 'displays this syntax guide',
-	},
-	{
-		keys: ['-k', '--keyframes'],
-		call: (val) => (keyFrameFile = val),
-		getValue: () => keyFrameFile,
-		description: "only used with 'Keyframes' mode; sets the keyframe file to use",
-	},
-	{
-		keys: ['-b', '--bitrate'],
-		default: () => (bitrate = null),
-		call: (val) => (bitrate = val),
-		getValue: () => bitrate,
-		description: 'sets the maximum bitrate of the video. Lowering this might reduce file size.',
-	},
-	{
-		keys: ['--thread'],
-		default: () => (maxThread = 2),
-		call: (val) => (maxThread = parseInt(val)),
-		getValue: () => maxThread,
-		description: 'sets maximum allowed number of threads to use',
-	},
-	{
-		keys: ['-t', '--tempo'],
-		default: () => (tempo = 2),
-		call: (val) => (tempo = val),
-		getValue: () => tempo,
-		description: 'regulates speed of bouncing',
-	},
-	{
-		keys: ['-a', '--angle'],
-		default: () => (angle = 360),
-		call: (val) => (angle = parseInt(val)),
-		getValue: () => angle,
-		description: "angle to rotate per second when using 'Rotate' mode",
-	},
-	{
-		keys: ['-o', '--output'],
-		// no "-o" argument, use default path in the format "chungus_Bounce.webm"
-		default: () => (outputPath = path.join(filePath, `${fileName}_${selectedModes.join('_')}.webm`)),
-		call: (val) => (outputPath = val),
-		getValue: () => outputPath,
-		description: 'sets output file.',
-	},
-	{
-		keys: ['-c', '--compression'],
-		default: () => (compressionLevel = 0),
-		call: (c) => (compressionLevel = c),
-		getValue: () => compressionLevel,
-		description: 'sets compression level (higher value means more compression)',
-	},
-	{
-		keys: ['-l', '--language'],
-		default: () => { },
-		call: (l) => (setLocale(l)),
-		// allows for more than one -l flag, but i don't think it's worth exposing "currentLocale" just for this
-		getValue: () => undefined,
-		description: 'Sets the used language',
-	},
-	{
-		keys: ['--no-update-check'],
-		noValueAfter: true,
-		call: () => ( updateCheck = false ),
-		description: 'disables the automatic update check',
-	},
-	{
-		keys: ['--transparency'],
-		// by default, ignore frames with an alpha value of 1 (or 0)
-		default: () => { transparencyThreshold = 1 },
-		call: (v) => { transparencyThreshold = parseInt(v) },
-		getValue: () => transparencyThreshold,
-		description: 'sets the transparency threshold for use with the "transparency" mode'
-	}
-]
-
-function parseCommandArguments() {
-	for (let i = 2; i < process.argv.length; i++) {
-		const arg = process.argv[i]
-
-		// named arguments
-		if (arg.startsWith('-')) {
-			let argFound = false
-			for (const j of argsConfig) {
-				if (j.keys.includes(arg)) {
-					// need value but no argument after                    || set argument value twice
-					if ((!j.noValueAfter && i === process.argv.length - 1) || (j.getValue && j.getValue() !== undefined)) {
-						console.error(localizeString("arg_cannot_be_set", { arg }))
-						return displayUsage()
-					}
-					if (j.noValueAfter)
-						j.call(null)
-					else
-						j.call(++i === process.argv.length ? null : process.argv[i])
-					argFound = true
-					break
-				}
-			}
-			if (!argFound) {
-				console.error(localizeString('illegal_argument', { arg }))
-				return displayUsage()
-			}
-			continue
-		}
-		// positional arguments
-		//
-		// basically, first positional argument is inputType, second one
-		// (and every one after that) is video path, except when the first one doesn't
-		// match any of the input types, in which case its also part of the path.
-		// split by + before trying to match to modes in order to support using multiple modes.
-		const inputModes = arg.toLowerCase().split('+')
-		if (selectedModes.length === 0 && inputModes.every((x) => modes.hasOwnProperty(x))) selectedModes = inputModes
-		else videoPath.push(arg)
-	}
-
-	// not a single positional argument, we need at least 1
-	if (selectedModes.length === 0) {
-		selectedModes = ['bounce']
-		console.warn(localizeString('no_mode_selected', { default: selectedModes.join('+')}))
-	}
-	// Keyframes mode selected without providing keyframe file
-	if (selectedModes.includes('keyframes') && (keyFrameFile === undefined || !fs.existsSync(keyFrameFile))) {
-		if (keyFrameFile) console.error(localizeString('kf_file_not_found', { file: keyFrameFile }))
-		else console.error(localizeString('kf_file_required'))
-		return displayUsage()
-	}
-
-	// got 1 positional argument, which was the mode to use - no file path!
-	if (videoPath.length === 0) {
-		console.error(localizeString('no_video_file'))
-		return displayUsage()
-	}
-	else videoPath = videoPath.join(' ')
-	fileName = getFileName(videoPath)
-	filePath = path.dirname(videoPath)
-
-	// check if value not given, use default
-	for (const i of argsConfig) if (i.default && i.getValue() === undefined) i.default()
-
-	return true
-}
-
 // Build an index of temporary locations so they do not need to be repeatedly rebuilt.
 // All temporary files are within one parent folder for cleanliness and ease of removal.
-const workLocations = {}
 
-function buildLocations() {
+function buildLocations(tempDirName) {
+	const workLocations = {}
 	// maybe use `os.tmpdir()` instead of the cwd?
-	workLocations.tempFolder = path.join(__dirname, 'tempFiles')
+	workLocations.tempFolder = path.join(__dirname, 'tempDir', tempDirName)
 	workLocations.tempAudio = path.join(workLocations.tempFolder, 'tempAudio.webm')
 	//workLocations.tempVideo = path.join(workLocations.tempFolder, 'tempVideo.webm')
 	workLocations.tempConcatList = path.join(workLocations.tempFolder, 'tempConcatList.txt')
 	workLocations.tempFrames = path.join(workLocations.tempFolder, 'tempFrames')
 	workLocations.tempFrameFiles = path.join(workLocations.tempFrames, '%d.png')
 	workLocations.tempResizedFrames = path.join(workLocations.tempFolder, 'tempResizedFrames')
-}
-
-function displayUsage() {
-	// for appropriately indenting all the argument aliases so they line up nicely
-	const longestKeys = argsConfig.map((a) => a.keys.join(',')).sort((a, b) => b.length - a.length)[0].length
-	const Usage =
-		'WackyWebM by OIRNOIR#0032\n' +
-		'Usage: node wackywebm.js [-o output_file_path] [optional_type] [-k keyframe_file] <input_file>\n' +
-		argsConfig.map((arg) => `\t${(arg.keys.join(',') + ':').padEnd(longestKeys + 1, ' ')}  ${arg.description}`).join('\n') +
-		'\nRecognized Modes:\n' +
-		Object.keys(modes)
-			.map((m) => `\t${m}`)
-			.join('\n') +
-		'\nIf no mode is specified, "Bounce" is used.'
-	console.log(Usage)
+	return workLocations
 }
 
 function ffmpegErrorHandler(e) {
@@ -275,11 +97,11 @@ async function main(selectedModes, videoPath, keyFrameFile, bitrate, maxThread, 
 	if (!videoPath || !fs.existsSync(videoPath)) {
 		if (videoPath) console.error(localizeString('video_file_not_found', { file: videoPath }))
 		else console.error(localizeString('no_video_file'))
-		return displayUsage()
 	}
 
 	// Only build the path if temporary location index if the code can move forward. Less to do.
-	buildLocations()
+	const pathArray = videoPath.split('/')
+	const workLocations = buildLocations(pathArray[pathArray.length - 1])
 
 	// Use one call to ffprobe to obtain framerate, width, and height, returned as JSON.
 	console.log(localizeString('info1', { delta, video: videoPath }))
@@ -508,14 +330,12 @@ async function main(selectedModes, videoPath, keyFrameFile, bitrate, maxThread, 
 	await fs.promises.rm(workLocations.tempFolder, { recursive: true })
 }
 
-module.exports = { modes, main, args: argsConfig, run: main }
+module.exports = { modes, main, run: main }
 
 // recommended way to check if this file is the entry point, as per
 // https://nodejs.org/api/deprecations.html#DEP0144
 if (require.main !== module) return
 
-if (parseCommandArguments() !== true) return
-
 // we're ignoring a promise (the one returned by main) here. this is by design and not harmful, so ignore the warning
 // noinspection JSIgnoredPromiseFromCall
-main(selectedModes, videoPath, keyFrameFile, bitrate, maxThread, tempo, angle, compressionLevel, transparencyThreshold, outputPath)
+// main(selectedModes, videoPath, keyFrameFile, bitrate, maxThread, tempo, angle, compressionLevel, transparencyThreshold, outputPath)

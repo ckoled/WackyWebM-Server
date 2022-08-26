@@ -35,7 +35,7 @@ docker run --name wackywebmserver -d -p 8080:8080 wackywebmserver
 ```
 url: [API_BASE_PATH]/api/wackify
 query: {
-  mode: [default 'bounce']
+  mode: [default ['bounce']]
   bitrate: [default '1M']
   tempo: [default 2]
   angle: [default 360]
@@ -52,8 +52,6 @@ UI served at http://localhost:8080
 [Hosted Demo](https://wackify.jarasicrabit.com)
 
 ## TODO
- - convert main to handler
- - keyfile
  - save as
  - validation
 

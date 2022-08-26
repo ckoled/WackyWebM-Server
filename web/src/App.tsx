@@ -23,7 +23,8 @@ interface IFormValues {
 }
 
 function App() {
-  const [ fileList, setFileList ] = useState<UploadFile[]>([])
+  const [ file, setFile ] = useState<UploadFile>()
+  const [ keyfile, setKeyFile ] = useState<UploadFile>()
   const [ form ] = Form.useForm()
   const [ isLoading, setIsLoading ] = useState(false)
   const [ errorMsg, setErrorMsg ] = useState('')
@@ -37,9 +38,8 @@ function App() {
       const { protocol, hostname, port } = window.location;
       const url = `${protocol}//${hostname}:${port}/api/wackify`
       const formData = new FormData();
-      fileList.forEach(file => {
-        formData.append('file', file as RcFile);
-      });
+      formData.append('file', file as RcFile);
+      formData.append('keyfile', keyfile as RcFile);
       const resp = await axios.request({
         url,
         method: 'POST',
@@ -68,14 +68,14 @@ function App() {
           >
             <Upload
               onRemove={file => {
-                setFileList([]);
+                setFile(undefined);
               }}
               beforeUpload={file => {
-                setFileList([file]);
+                setFile(file);
 
                 return false;
               }}
-              fileList={fileList}
+              fileList={file?[file]:[]}
             >
               <Button icon={<UploadOutlined />}>Select File</Button>
             </Upload>
@@ -139,6 +139,23 @@ function App() {
               >
                 <InputNumber placeholder='1'/>
               </Form.Item>
+              <Form.Item
+                label='KeyFile'
+              >
+                <Upload
+                  onRemove={keyfile => {
+                    setKeyFile(undefined);
+                  }}
+                  beforeUpload={keyfile => {
+                    setKeyFile(keyfile);
+
+                    return false;
+                  }}
+                  fileList={keyfile?[keyfile]:[]}
+                >
+                  <Button icon={<UploadOutlined />}>Select File</Button>
+                </Upload>
+              </Form.Item>
             </Collapse.Panel>
           </Collapse>
           <br/>
@@ -150,7 +167,7 @@ function App() {
         <Typography.Title level={4} type='danger'>{errorMsg}</Typography.Title>
         { resp && 
           <>
-            <a href={resp} download='wackified.webm'>Download</a>
+            <a href={resp} download={file?.name + '_wacky.webm'}>Download</a>
             <ReactPlayer url={resp} muted={true} playing={true} controls={true}/>
           </>
         }

@@ -11,7 +11,7 @@ WORKDIR /wacky
 
 COPY . .
 RUN npm i
-RUN cd web && npm i && npm run build
+RUN npm run build
 
 EXPOSE 8080
 CMD ["node", "server.js"]
