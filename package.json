@@ -10,7 +10,9 @@
 		"fmt:check": "prettier --check **/*.{md,css,js,json}",
 		"lint": "eslint **/*.js",
 		"lint:fix": "eslint **/*.js --fix",
-		"terminal_ui": "node terminal-ui.js"
+		"server": "node server.js",
+		"clean": "rm -rf node_modules web/node_modules web/dist",
+		"build": "cd web && npm i && npm run build"
 	},
 	"repository": {
 		"type": "git",
@@ -28,10 +30,13 @@
 		"terminal-kit": "^2.5.1"
 	},
 	"engines": {
-    		"node": ">=16.15.0",
-    		"npm": ">=8.17.0"
-  	},
+		"node": ">=16.15.0",
+		"npm": ">=8.17.0"
+	},
 	"dependencies": {
+		"cors": "^2.8.5",
+		"express": "^4.18.1",
+		"express-fileupload": "^1.4.0",
 		"upng-js": "^2.1.0"
 	}
 }

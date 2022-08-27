@@ -97,6 +97,10 @@ dist
 # https://nextjs.org/blog/next-9-1#public-directory-support
 # public
 
+# vite build output
+web/dist
+web/build
+
 # vuepress build output
 .vuepress/dist
 
@@ -136,3 +140,4 @@ dist
 
 # Ignore tempfiles created during testing
 tempFiles/
+server_tmp/
